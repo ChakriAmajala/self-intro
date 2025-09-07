@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB_REPO = "chakriamajaladocker/html-self-page"
+        DOCKER_HUB_CREDENTIALS = "dockerhub-cred-id" // Jenkins lo credentials ID
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/ChakriAmajala/HTML-Self-page.git'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t $DOCKER_HUB_REPO:latest ."
+                }
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                script {
+                    sh '''
+                    # stop & remove old container if exists
+                    docker rm -f html-self-page || true
+
+                    # run new container
+                    docker run -d -p 8002:80 --name html-self-page $DOCKER_HUB_REPO:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: "$DOCKER_HUB_CREDENTIALS", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                        sh "docker push $DOCKER_HUB_REPO:latest"
+                    }
+                }
+            }
+        }
+    }
+}
+
+
