@@ -13,13 +13,14 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    sh "docker build -t $DOCKER_HUB_REPO:latest ."
-                }
-            }
+stage('Build Docker Image') {
+    steps {
+        dir("${WORKSPACE}") {
+            sh 'ls -l'   // Debugging: check files are there
+            sh 'docker build -t chakriamajaladocker/html-self-page:latest .'
         }
+    }
+}
 
         stage('Run Container') {
             steps {
