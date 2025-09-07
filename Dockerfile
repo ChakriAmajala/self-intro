@@ -1,8 +1,6 @@
 FROM nginx:alpine
 
-# Copy HTML + CSS
-COPY index.html /usr/share/nginx/html/
-COPY style.css /usr/share/nginx/html/
+# Copy all files from src to nginx html folder
+COPY src/ /usr/share/nginx/html/
 
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
